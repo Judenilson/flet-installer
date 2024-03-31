@@ -104,6 +104,7 @@ def main(page: ft.Page):
 
     directory_path = ft.TextField(value=f"{install_directory}", color=ft.colors.BLACK, bgcolor=ft.colors.GREY_400, content_padding=3, read_only=True)
     free_space = ft.Text(text_language[1], size=10)
+    
 
     def get_directory_result(e: ft.FilePickerResultEvent):
         global install_directory
@@ -121,8 +122,10 @@ def main(page: ft.Page):
     get_directory_dialog = ft.FilePicker(on_result=get_directory_result)
     page.overlay.extend([get_directory_dialog])
 
-    def confirming_directory(e):
+    def install_app(e):
         global config_file
+        progress_ring.visible = True
+        progress_ring.update()
         print("Instalando...")
         
         config_file['language'] = language_type
@@ -132,11 +135,13 @@ def main(page: ft.Page):
         zipFile = caminho_atual + '\\setup'
         if unzip(zipFile, install_directory):
             print("Programa instalado com sucesso!")
+            progress_ring.visible = False
             page.go('/pg5')
 
 
     next_button = ft.ElevatedButton(text_language[6], on_click=lambda _: page.go('/pg1'))
     cancel_button = ft.ElevatedButton(text_language[7], on_click=lambda _: page.window_destroy())
+    progress_ring = ft.ProgressRing(width=30, height=30, stroke_width = 2, visible=False)
 
     def change_language(e):
         global text_language
@@ -392,9 +397,22 @@ def main(page: ft.Page):
                                                             ft.ElevatedButton(
                                                                 text_language[32], on_click=lambda _: get_directory_dialog.get_directory_path()),
                                                         ]
-                                                    ), border=ft.border.all(1, ft.colors.GREY_800), padding=ft.Padding(20, 20, 20, 20), border_radius=ft.border_radius.all(8)),
-                                                    ft.Text(text_language[33], size=10),
-                                                    free_space
+                                                    ), 
+                                                    border=ft.border.all(1, ft.colors.GREY_800), 
+                                                    padding=ft.Padding(20, 20, 20, 20), 
+                                                    border_radius=ft.border_radius.all(8)),
+                                                    ft.Row(
+                                                        [
+                                                            ft.Column(
+                                                                [
+                                                                    ft.Text(text_language[33], size=10),
+                                                                    free_space
+                                                                ],
+                                                            ),
+                                                            ft.Container(expand=True),
+                                                            progress_ring,
+                                                        ],
+                                                    ),
                                                 ],
                                                 height=310,
                                             ),
@@ -405,7 +423,7 @@ def main(page: ft.Page):
                                                         content=ft.ElevatedButton(text_language[5], on_click=lambda _: page.go('/pg2')),
                                                     ),
                                                     ft.Container(
-                                                        content=ft.ElevatedButton(text_language[9], on_click=confirming_directory),
+                                                        content=ft.ElevatedButton(text_language[9], on_click=install_app),
                                                     ),
                                                     ft.Container(
                                                         content=ft.ElevatedButton(text_language[7], on_click=lambda _: page.window_destroy()),
