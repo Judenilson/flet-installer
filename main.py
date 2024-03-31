@@ -35,7 +35,7 @@ def create_shortcut(target_path: str, shortcut_name: str) -> None:
     '''
     desktop_path = get_desktop_path()
     shortcut_path = os.path.join(desktop_path, shortcut_name + ".lnk")
-    app_path = os.path.join(target_path, 'FSLTL Editor\\fsltleditor.lnk')
+    app_path = os.path.join(target_path, 'FSLTL Editor\\FSLTL Editor.lnk')
 
     # Cria o atalho
     try:
