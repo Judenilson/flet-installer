@@ -22,10 +22,20 @@ def get_config_locate():
 def get_desktop_path():
     return os.path.join(os.path.expanduser('~'), 'Desktop')
 
-def create_shortcut(target_path, shortcut_name):
+def create_shortcut(target_path: str, shortcut_name: str) -> None:
+    '''
+    Cria um atalho para o aplicativo instalado no Desktop.
+
+    Parameters
+    -
+    target_path : str
+        Caminho para ser criado o atalho
+    shortcut_name : str
+        Nome do atalho
+    '''
     desktop_path = get_desktop_path()
     shortcut_path = os.path.join(desktop_path, shortcut_name + ".lnk")
-    app_path = os.path.join(target_path, '\\FSLTL Editor\\fsltleditor.lnk')
+    app_path = os.path.join(target_path, 'FSLTL Editor\\fsltleditor.lnk')
 
     # Cria o atalho
     try:
@@ -47,7 +57,7 @@ def unzip(zip_file_path, dest_dir):
         try:
             with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
                 zip_ref.extractall(dest_dir)
-                return True
+            return True
         except Exception as e:
             print(f"Erro:{str(e)}")
             return False
@@ -151,7 +161,7 @@ def main(page: ft.Page):
 
     def install_app(e):
         global config_file
-        
+
         progress_ring.visible = True
         progress_ring.update()
         print("Instalando...")
@@ -163,7 +173,7 @@ def main(page: ft.Page):
         caminho_atual = os.getcwd()
         zipFile = caminho_atual + '\\setup'
         if unzip(zipFile, install_directory):
-            create_shortcut(install_directory, 'FSLTL Editor')
+            create_shortcut(install_directory, 'FSLTL Editor')            
             print("Programa instalado com sucesso!")            
             progress_ring.visible = False
             page.go('/pg5')
