@@ -1,12 +1,13 @@
 import flet as ft
 import psutil
+import shutil
+import winreg
 import zipfile
 import os
 import json
 import assets.scripts.language as language
 
 config_file = {'language':'ENG', 'theme': 'dark', 'fsltl_dir': '', 'cia_off': ''}
-config_locate = os.path.join(os.path.expanduser('~'), 'fsltl_config.cfg')
 
 install_directory = 'C:\\'
 language_type = 'ENG'
@@ -14,6 +15,32 @@ text_language = language.language[language_type]
 languages_options = []
 for lang in language.language.keys():
     languages_options.append(ft.dropdown.Option(text=language.language[lang][0], key=lang))
+
+def get_config_locate():
+    return os.path.join(os.path.expanduser('~'), 'fsltl_config.cfg')
+
+def get_desktop_path():
+    return os.path.join(os.path.expanduser('~'), 'Desktop')
+
+def create_shortcut(target_path, shortcut_name):
+    desktop_path = get_desktop_path()
+    shortcut_path = os.path.join(desktop_path, shortcut_name + ".lnk")
+    app_path = os.path.join(target_path, '\\FSLTL Editor\\fsltleditor.lnk')
+
+    # Cria o atalho
+    try:
+        shutil.copy(app_path, shortcut_path)
+        print(f"Atalho '{shortcut_name}' criado com sucesso em '{shortcut_path}'")
+    except Exception as e:
+        print(f"Erro ao criar atalho: {e} na pasta padrão")
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r'Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders')
+            desktop_path, _ = winreg.QueryValueEx(key, "Desktop")
+            shortcut_path = os.path.join(desktop_path, shortcut_name + ".lnk")
+            shutil.copy(app_path, shortcut_path)
+        except Exception as e:
+            print(f"Erro ao obter o caminho do desktop: {e}")
+            
 
 def unzip(zip_file_path, dest_dir):
     if os.path.exists(dest_dir):
@@ -33,7 +60,7 @@ def save_config():
     Salva as configurações no disco.
     '''
     try:  
-        with open(config_locate, 'w') as file:
+        with open(get_config_locate(), 'w') as file:
             json.dump(config_file, file)
         print('Configs salvas')
         
@@ -53,10 +80,10 @@ def read_config():
     '''
     global config_file
 
-    if not os.path.exists(config_locate):
+    if not os.path.exists(get_config_locate()):
         save_config()
     else:
-        with open(config_locate, 'r') as file:
+        with open(get_config_locate(), 'r') as file:
             config_file = json.load(file)
         print('Configuração carregada com sucesso.')
         if config_file['fsltl_dir'] == '':
@@ -124,17 +151,20 @@ def main(page: ft.Page):
 
     def install_app(e):
         global config_file
+        
         progress_ring.visible = True
         progress_ring.update()
         print("Instalando...")
         
         config_file['language'] = language_type
+        config_file['fsltl_dir'] = ''
         save_config()
-
+        
         caminho_atual = os.getcwd()
         zipFile = caminho_atual + '\\setup'
         if unzip(zipFile, install_directory):
-            print("Programa instalado com sucesso!")
+            create_shortcut(install_directory, 'FSLTL Editor')
+            print("Programa instalado com sucesso!")            
             progress_ring.visible = False
             page.go('/pg5')
 
